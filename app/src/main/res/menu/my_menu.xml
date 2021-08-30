@@ -4,11 +4,11 @@
     <item
         android:icon="@drawable/ic_character"
         android:id="@+id/characters"
-        android:title="Characters" />
+        android:title="@string/characters" />
 
     <item
         android:icon="@drawable/ic_comic"
         android:id="@+id/comics"
-        android:title="Comics" />
+        android:title="@string/comics" />
 
 </menu>
