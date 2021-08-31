@@ -1,15 +1,18 @@
 package com.nakul.marvel_verse
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nakul.marvel_verse.fragments.CharacterFragment
 import com.nakul.marvel_verse.fragments.ComicFragment
 import com.nakul.marvel_verse.utils.BackPressedEvent
+import com.nakul.marvel_verse.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bottomNav: BottomNavigationView
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

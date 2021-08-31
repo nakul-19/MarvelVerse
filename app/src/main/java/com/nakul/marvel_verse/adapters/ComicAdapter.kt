@@ -7,11 +7,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.nakul.marvel_verse.R
-import com.nakul.marvel_verse.models.CharacterModel
+import com.nakul.marvel_verse.models.ComicModel
 import com.nakul.marvel_verse.utils.toUrl
 
-class CharacterAdapter(val list: ArrayList<CharacterModel>) :
-    RecyclerView.Adapter<CharacterAdapter.VH>() {
+class ComicAdapter(val list: ArrayList<ComicModel>) :
+    RecyclerView.Adapter<ComicAdapter.VH>() {
     class VH(v: View) : RecyclerView.ViewHolder(v)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH = VH(
@@ -20,7 +20,7 @@ class CharacterAdapter(val list: ArrayList<CharacterModel>) :
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         holder.itemView.apply {
-            findViewById<TextView>(R.id.item_text).text = list[position].name
+            findViewById<TextView>(R.id.item_text).text = list[position].title
             Glide.with(this).load(list[position].thumbnail.toUrl())
                 .into(findViewById(R.id.item_image))
         }
