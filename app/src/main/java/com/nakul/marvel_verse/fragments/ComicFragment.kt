@@ -69,12 +69,16 @@ class ComicFragment : Fragment(), BackPressedEvent {
                         comicAdapter.notifyDataSetChanged()
                         if (list.isEmpty()) {
                             cText.visibility = View.VISIBLE
-                        }
+                        } else
+                            cText.visibility = View.GONE
                     }
                 }
                 is ProcessState.Loading -> {
                     list.clear()
-                    activity?.runOnUiThread { comicAdapter.notifyDataSetChanged() }
+                    activity?.runOnUiThread {
+                        comicAdapter.notifyDataSetChanged()
+                        cText.visibility = View.GONE
+                    }
                     loading()
                 }
                 is ProcessState.Failure -> {
@@ -86,6 +90,7 @@ class ComicFragment : Fragment(), BackPressedEvent {
 
             }
         }
+        viewModel.loadComics()
 
         filter.setOnClickListener {
             filterVisible = true
@@ -94,6 +99,8 @@ class ComicFragment : Fragment(), BackPressedEvent {
         }
 
         removeFilter.setOnClickListener {
+            if (viewModel.filter != NO_FILTER)
+                recyclerView.smoothScrollToPosition(0)
             filterLayout.visibility = View.GONE
             it.visibility = View.INVISIBLE
             removeFilters()
@@ -101,6 +108,7 @@ class ComicFragment : Fragment(), BackPressedEvent {
 
         fThisWeek.setOnClickListener {
             viewModel.filterComics(THIS_WEEK)
+            recyclerView.smoothScrollToPosition(0)
             fThisWeek.setBackgroundResource(R.drawable.selected_filter)
             fThisMonth.setBackgroundResource(R.drawable.unselected_filter)
             fLastWeek.setBackgroundResource(R.drawable.unselected_filter)
@@ -109,6 +117,7 @@ class ComicFragment : Fragment(), BackPressedEvent {
 
         fNextWeek.setOnClickListener {
             viewModel.filterComics(NEXT_WEEK)
+            recyclerView.smoothScrollToPosition(0)
             fNextWeek.setBackgroundResource(R.drawable.selected_filter)
             fThisMonth.setBackgroundResource(R.drawable.unselected_filter)
             fLastWeek.setBackgroundResource(R.drawable.unselected_filter)
@@ -117,6 +126,7 @@ class ComicFragment : Fragment(), BackPressedEvent {
 
         fLastWeek.setOnClickListener {
             viewModel.filterComics(LAST_WEEK)
+            recyclerView.smoothScrollToPosition(0)
             fLastWeek.setBackgroundResource(R.drawable.selected_filter)
             fThisMonth.setBackgroundResource(R.drawable.unselected_filter)
             fNextWeek.setBackgroundResource(R.drawable.unselected_filter)
@@ -125,6 +135,7 @@ class ComicFragment : Fragment(), BackPressedEvent {
 
         fThisMonth.setOnClickListener {
             viewModel.filterComics(THIS_MONTH)
+            recyclerView.smoothScrollToPosition(0)
             fThisMonth.setBackgroundResource(R.drawable.selected_filter)
             fThisWeek.setBackgroundResource(R.drawable.unselected_filter)
             fLastWeek.setBackgroundResource(R.drawable.unselected_filter)
@@ -165,6 +176,11 @@ class ComicFragment : Fragment(), BackPressedEvent {
             .setBackgroundResource(R.drawable.unselected_filter)
         v.findViewById<TextView>(R.id.f_this_month)
             .setBackgroundResource(R.drawable.unselected_filter)
+        viewModel.filterComics(NO_FILTER)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
         viewModel.filterComics(NO_FILTER)
     }
 

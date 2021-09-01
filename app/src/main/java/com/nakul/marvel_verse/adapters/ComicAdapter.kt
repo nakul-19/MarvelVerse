@@ -1,5 +1,6 @@
 package com.nakul.marvel_verse.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ class ComicAdapter(val list: ArrayList<ComicModel>) :
     override fun onBindViewHolder(holder: VH, position: Int) {
         holder.itemView.apply {
             findViewById<TextView>(R.id.item_text).text = list[position].title
+            Log.d("image",list[position].thumbnail.toUrl())
             Glide.with(this).load(list[position].thumbnail.toUrl())
                 .into(findViewById(R.id.item_image))
         }

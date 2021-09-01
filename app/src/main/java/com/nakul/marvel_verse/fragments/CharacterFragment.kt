@@ -1,11 +1,17 @@
 package com.nakul.marvel_verse.fragments
 
+import android.graphics.Color
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -21,12 +27,14 @@ import com.nakul.marvel_verse.models.ProcessState
 import com.nakul.marvel_verse.utils.BackPressedEvent
 import com.nakul.marvel_verse.viewmodel.MainViewModel
 
+
 class CharacterFragment : Fragment(), BackPressedEvent {
 
     private val viewModel by activityViewModels<MainViewModel>()
     private lateinit var v: View
     private lateinit var searchView: SearchView
     private lateinit var loader: ImageView
+    private lateinit var title: TextView
     private lateinit var recyclerView: RecyclerView
     private val list = ArrayList<CharacterModel>()
     private var isLoading = false
@@ -44,6 +52,24 @@ class CharacterFragment : Fragment(), BackPressedEvent {
     }
 
     private fun initUI() {
+        title = v.findViewById(R.id.title)
+
+        val span: Spannable = SpannableString("MARVELVERSE")
+        span.setSpan(
+            ForegroundColorSpan(Color.rgb(232, 17, 34)),
+            0,
+            6,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        span.setSpan(
+            ForegroundColorSpan(Color.WHITE),
+            6,
+            11,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        title.text = span
+
         searchView = v.findViewById(R.id.searchView)
         loader = v.findViewById(R.id.loader)
         recyclerView = v.findViewById(R.id.character_recycler)
@@ -52,9 +78,11 @@ class CharacterFragment : Fragment(), BackPressedEvent {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (!query.isNullOrBlank()) {
+                    list.clear()
+                    characterAdapter.notifyDataSetChanged()
                     viewModel.searching(query)
-                    viewModel.loadCharacters()
                 }
+                isLastPage = false
                 return false
             }
 
@@ -63,6 +91,21 @@ class CharacterFragment : Fragment(), BackPressedEvent {
             }
 
         })
+
+        searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                title.visibility = View.GONE
+            } else if (searchView.isIconified) {
+                title.visibility = View.VISIBLE
+            }
+        }
+
+        searchView.setOnCloseListener {
+            title.visibility= View.VISIBLE
+            if (searchView.query.isNotBlank())
+            recyclerView.smoothScrollToPosition(0)
+            return@setOnCloseListener false
+        }
 
         characterAdapter = CharacterAdapter(list)
 
@@ -75,6 +118,7 @@ class CharacterFragment : Fragment(), BackPressedEvent {
         viewModel.characterList.observe(viewLifecycleOwner, {
             when (it) {
                 is ProcessState.Success -> {
+                    Log.d("CharacterFragment", "Loaded")
                     if (list.size == it.res.size) {
                         isLastPage = true
                         stopLoading()
@@ -82,9 +126,11 @@ class CharacterFragment : Fragment(), BackPressedEvent {
                     }
                     list.clear()
                     list.addAll(it.res)
+                    stopLoading()
                     characterAdapter.notifyDataSetChanged()
                 }
                 is ProcessState.Loading -> {
+                    Log.d("CharacterFragment", "Loading")
                     loading()
                 }
                 is ProcessState.Failure -> {
@@ -94,6 +140,7 @@ class CharacterFragment : Fragment(), BackPressedEvent {
                 }
             }
         })
+        loadData()
     }
 
     private val scrollListener = object : RecyclerView.OnScrollListener() {
@@ -146,10 +193,18 @@ class CharacterFragment : Fragment(), BackPressedEvent {
         return if (!searchView.isIconified) {
             searchView.setQuery(null, false)
             searchView.isIconified = true
+            title.visibility = View.VISIBLE
             viewModel.searchStopped()
+            isLastPage = false
             false
         } else
             true
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        isLastPage = false
+        viewModel.searchStopped()
     }
 
 }
